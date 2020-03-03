@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/wsbg.png</file>
+        <file>images/Weather_Gui.png</file>
+        <file>images/Cloud_Sun.png</file>
+        <file>images/cs300.png</file>
+        <file>images/menubar.png</file>
+    </qresource>
+</RCC>
