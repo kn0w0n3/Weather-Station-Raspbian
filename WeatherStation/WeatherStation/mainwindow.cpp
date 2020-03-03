@@ -72,7 +72,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
       connect(refreshDate, SIGNAL(timeout()), this, SLOT(showDate()));
       refreshDate->start(1000);
 
-      //Temperature in farenheight Display
+      //Temperature in fahrenheight Display
       temperature = new TextData();
       temperature->setPos(700,120);
       scene->addItem(temperature); 
@@ -87,7 +87,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
       humidity->setPos(700,260);
       scene->addItem(humidity);
 
-      //Temperature in farenheight outdoor Display
+      //Temperature in fahrenheight outdoor Display
       outDoorTempFar = new TextData();
       outDoorTempFar->setPos(55,120);
       scene->addItem(outDoorTempFar);
@@ -97,7 +97,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
       outDoorTempCel = new TextData();
       outDoorTempCel->setPos(55,190);
       scene->addItem(outDoorTempCel);
-
 }
 
 MainWindow::~MainWindow(){
@@ -112,8 +111,8 @@ void MainWindow::displayTempData(QString data){
         }
         if(data.length() == 5){
             tempCelsius->yellowTextData(data + " °C" );
-            double celToFarenheight = ((data.toDouble() * 9.0) / 5.0) + 32;
-            QString temp = QString::number(celToFarenheight);
+            double celToFahrenheight = ((data.toDouble() * 9.0) / 5.0) + 32;
+            QString temp = QString::number(celToFahrenheight);
             temperature->yellowTextData(temp + " °F");
         }
     }    
@@ -176,5 +175,4 @@ void MainWindow::processNetworkData(QByteArray data){
     double farToCel = (5.0 / 9.0) * (temperature.toDouble() - 32.0);
     QString temp = QString::number(farToCel, 'f', 2);
     outDoorTempCel->blueTextData( temp + " °C");
-    //(fahrenheit - 32.0) * 5.0 / 9.0;
 }
