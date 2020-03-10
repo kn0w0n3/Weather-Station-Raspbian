@@ -10,7 +10,7 @@ void OutdoorWeather::makeRequest(QString endpointRequest){
 }
 
 void OutdoorWeather::readyRead(QNetworkReply *reply){
-    QByteArray myData;
-    myData = reply->readAll();
-    emit this->dataReadyRead(myData);
+    QString ReplyText;
+    ReplyText = reply->readAll();
+    emit this->dataReadyRead(ReplyText);
 }

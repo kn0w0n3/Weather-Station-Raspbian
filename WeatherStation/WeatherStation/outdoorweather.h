@@ -13,7 +13,7 @@ public:
     void makeRequest(QString);
 
 signals:
-    void dataReadyRead(QByteArray);
+    void dataReadyRead(QString);
 
 public slots:
     void readyRead(QNetworkReply *);

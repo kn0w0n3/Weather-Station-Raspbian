@@ -13,6 +13,11 @@
 #include <QTimer>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include<QJsonValue>
+
 #include "textdata.h"
 #include "backgrounditem.h"
 #include "outdoorweather.h"
@@ -30,14 +35,17 @@ public:
     ~MainWindow() override;
     void displayTempData(QString);
     void displayHumidData(QString);
-
+    void displayLightData(QString);
     void resizeEvent(QResizeEvent *event) override;
+    void setWeatherIcon(int);
+
 
 public slots:
     void receiveSerialData();
     void displayTime();
     void showDate();
-    void processNetworkData(QByteArray);
+    void processNetworkData(QString);
+    void requestSensorData();
 
 private:
     Ui::MainWindow *ui;
@@ -46,21 +54,34 @@ private:
     QGraphicsScene *scene;
     QSerialPort *serialPort;
     BackgroundItem *background;
-    BackgroundItem *cloudSun;
+    BackgroundItem *icon;
+    BackgroundItem *lux;
+
+    QString iconPath = ":images/";
+    bool iconActive;
 
     TextData *temperature;
     TextData *tempCelsius;
     TextData *humidity;
+    TextData *lightData;
 
-    TextData *outDoorTempFar;
-    TextData *outDoorTempCel;
+    TextData *externalTempFahr;
+    TextData *externalTempCel;
+    TextData *externalHumidity;
+    TextData *weatherText;
 
     int counter;
     QTimer *refreshClock;
     QTimer *refreshDate;
+    QTimer *requestSensData;
     TextData *currentTime;
     TextData *currentDate;
-
+    QByteArray serialData;
+    QString serialBuffer;
+    bool n1;
+    bool n2;
+    bool n3;
+    int weatherIcon;
 };
 
 #endif // MAINWINDOW_H

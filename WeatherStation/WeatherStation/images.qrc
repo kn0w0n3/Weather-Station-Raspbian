@@ -1,9 +1,21 @@
 <RCC>
     <qresource prefix="/">
-        <file>images/wsbg.png</file>
-        <file>images/Weather_Gui.png</file>
-        <file>images/Cloud_Sun.png</file>
-        <file>images/cs300.png</file>
         <file>images/menubar.png</file>
+        <file>images/Weather_Gui2.png</file>
+        <file>images/lux.png</file>
+        <file>images/lux100.png</file>
+        <file>images/7.png</file>
+        <file>images/38.png</file>
+        <file>images/18.png</file>
+        <file>images/1.png</file>
+        <file>images/2.png</file>
+        <file>images/3.png</file>
+        <file>images/4.png</file>
+        <file>images/6.png</file>
+        <file>images/8.png</file>
+        <file>images/12.png</file>
+        <file>images/13.png</file>
+        <file>images/14.png</file>
+        <file>images/5.png</file>
     </qresource>
 </RCC>

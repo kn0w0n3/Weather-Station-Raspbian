@@ -11,11 +11,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
                                    "QMenu{background-color: #2f2f2f; color: white}"
                                    "QMenu::item:selected{background: #ffffff; color: black}");
     counter = 0;
-
-    this->myRegEx = new QRegularExpression("Imperial\\\":{\\\"Value\\\":\\d\\d.\\d");
-    this->networkManager = new OutdoorWeather();
-    connect(networkManager, SIGNAL(dataReadyRead(QByteArray)), this, SLOT(processNetworkData(QByteArray)));
-    networkManager->makeRequest("http://dataservice.accuweather.com/currentconditions/v1/327147?apikey=d3PFMAGeiKnHepd7bVDZTGeqmWBaWfqt&details=true");
+    serialBuffer = "";
+    n1 = false;
+    n2= false;
+    n3 =false;
+    iconActive = false;
 
     //Check for connected serial devices
       foreach(const QSerialPortInfo &info,QSerialPortInfo::availablePorts()){
@@ -44,13 +44,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
       ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
       setCentralWidget(ui->graphicsView);
 
-      background = new BackgroundItem(QPixmap(":images/Weather_Gui"));
+      background = new BackgroundItem(QPixmap(":images/Weather_Gui2"));
       background->setPos(0,0);
       scene->addItem(background);
 
-      cloudSun= new BackgroundItem(QPixmap(":images/cs300"));
-      cloudSun->setPos(295,125);
-      scene->addItem(cloudSun);
+      lux= new BackgroundItem(QPixmap(":images/lux100"));
+      lux->setPos(15,420);
+      scene->addItem(lux);
 
       //Date Text
       currentDate = new TextData();
@@ -72,38 +72,59 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
       connect(refreshDate, SIGNAL(timeout()), this, SLOT(showDate()));
       refreshDate->start(1000);
 
+      //Timer to request sensor data every 3 seconds
+      requestSensData = new QTimer();
+      connect(requestSensData, SIGNAL(timeout()), this, SLOT(requestSensorData()));
+      requestSensData->start(3000);
+
       //Temperature in fahrenheight Display
       temperature = new TextData();
-      temperature->setPos(700,120);
+      temperature->setPos(690,120);
       scene->addItem(temperature); 
 
       //Temperature in celsius Display
       tempCelsius =new TextData();
-      tempCelsius->setPos(700,190);
+      tempCelsius->setPos(690,190);
       scene->addItem(tempCelsius);
 
       //Humidity Display
       humidity = new TextData();
-      humidity->setPos(700,260);
+      humidity->setPos(690,260);
       scene->addItem(humidity);
 
       //Temperature in fahrenheight outdoor Display
-      outDoorTempFar = new TextData();
-      outDoorTempFar->setPos(55,120);
-      scene->addItem(outDoorTempFar);
-
+      externalTempFahr = new TextData();
+      externalTempFahr->setPos(50,120);
+      scene->addItem(externalTempFahr);
 
       //Temperature in celsius outdoor Display
-      outDoorTempCel = new TextData();
-      outDoorTempCel->setPos(55,190);
-      scene->addItem(outDoorTempCel);
+      externalTempCel = new TextData();
+      externalTempCel->setPos(50,190);
+      scene->addItem(externalTempCel);
+
+      externalHumidity = new TextData();
+      externalHumidity->setPos(50,260);
+      scene->addItem(externalHumidity);
+
+      lightData = new TextData();
+      lightData->setPos(130,430);
+      scene->addItem(lightData);
+
+      weatherText = new TextData();
+      weatherText->setPos(390,320);
+      scene->addItem(weatherText);
+
+      //requestSensorData();
+      this->networkManager = new OutdoorWeather();
+      connect(networkManager, SIGNAL(dataReadyRead(QString)), this, SLOT(processNetworkData(QString)));
+      networkManager->makeRequest("http://dataservice.accuweather.com/currentconditions/v1/327147?apikey=d3PFMAGeiKnHepd7bVDZTGeqmWBaWfqt&details=true");
 }
 
 MainWindow::~MainWindow(){
     delete ui;
 }
 
-
+//Display the temperature sensor data on screen
 void MainWindow::displayTempData(QString data){
     if(counter == 1){
         if(data.length() != 5){
@@ -111,13 +132,14 @@ void MainWindow::displayTempData(QString data){
         }
         if(data.length() == 5){
             tempCelsius->yellowTextData(data + " °C" );
-            double celToFahrenheight = ((data.toDouble() * 9.0) / 5.0) + 32;
-            QString temp = QString::number(celToFahrenheight);
+            double celToFahrenheight = ((data.toDouble() * 9.0) / 5.0) + 32 ;
+            QString temp = QString::number(celToFahrenheight, 'f', 2);
             temperature->yellowTextData(temp + " °F");
         }
     }    
 }
 
+//Display the humidity sensor data on screen
 void MainWindow::displayHumidData(QString data){
     if(counter == 2){
         if(data.length() != 5){
@@ -128,51 +150,158 @@ void MainWindow::displayHumidData(QString data){
     }
 }
 
+//Display the light sensor data on screen
+void MainWindow::displayLightData(QString data){
+    if(counter == 3){
+        lightData->whiteTextData(data);
+    }
+}
+
+//resize the window
 void MainWindow::resizeEvent(QResizeEvent *event){
     QMainWindow::resizeEvent(event);
     ui->graphicsView->fitInView(0, 0, 901, 531, Qt::IgnoreAspectRatio);
 }
 
-void MainWindow::receiveSerialData(){
-    counter++;
-    QByteArray bytearray;
-    bytearray = serialPort->readLine().trimmed();
-    QString receivedData = QString(bytearray);
+//Set weather icon
+void MainWindow::setWeatherIcon(int n){
 
-    qDebug() << receivedData;
-
-    if(counter == 1){
-        displayTempData(receivedData);
+    if(iconActive == true){
+        delete icon;
+        iconActive = false;
     }
-    else if(counter == 2){
-        displayHumidData(receivedData);
-        counter = 0;
+    for(int i = 1; i <= 44; i++){
+        if(n == i){
+            QString iconNumber = QString::number(i);
+            icon = new BackgroundItem(QPixmap(iconPath + iconNumber));
+            icon->setPos(295,125);
+            scene->addItem(icon);
+            iconActive = true;
+        }
     }
 }
 
+//Process the incoming serial data from arduino
+void MainWindow::receiveSerialData(){
+    int c = 0;
+    serialData = serialPort->readAll();
+    serialBuffer += QString::fromStdString(serialData.toStdString());
+    qDebug() << serialBuffer;
+    QStringList tempList = serialBuffer.split("\n");
+
+    foreach(QString value, tempList){
+        c++;
+        if(c == 1){
+            if(value.length() == 5){
+                qDebug() << "c = " << c;
+                qDebug() << value;
+                qDebug() << "ok 5";
+                n1 =true;
+                counter++;
+                displayTempData(value);
+            }
+        }
+        if(c == 2){
+            if(value.length() == 5){
+                qDebug() << "c = " << c;
+                qDebug() << value;
+                qDebug() << "ok 5";
+                n2 = true;
+                counter++;
+                displayHumidData(value);
+            }
+        }
+        if(c == 3){
+            if(value.length() == 1 || value.length() == 2 || value.length() == 3 || value.length() == 4){
+                qDebug() << "c = " << c;
+                qDebug() << value;
+
+                qDebug() << "ok 3";
+                n3 = true;
+                counter++;
+                displayLightData(value);
+            }
+        }
+        if(c == 3){
+            if( n1 == true && n2 == true && n3 == true){
+                qDebug() << "Data pass";
+
+                serialBuffer = "";
+                n1 = false;
+                n2 = false;
+                n3 = false;
+                c = 0;
+                counter = 0;
+            }
+            else if(!(n1 == true && n2 == true && n3 == true)){
+                qDebug() << "Data NOT Pass";
+
+                serialBuffer = "";
+                n1 = false;
+                n2 = false;
+                n3 = false;
+                c =0;
+                counter = 0;
+            }
+        }
+    }
+}
+
+//Display the current time
 void MainWindow::displayTime(){
     QTime cTime = QTime::currentTime();
     currentTime->textData(cTime.toString("hh:mm:ss"));
     QString vTime = cTime.toString("hh:mm:ss");
 }
 
+//Display the date
 void MainWindow::showDate(){
     QDate cDate = QDate::currentDate();
     currentDate->textData(cDate.toString("MM/dd/yyyy"));
 }
 
-void MainWindow::processNetworkData(QByteArray data){
+//Get current weather conditions from accuweather
+void MainWindow::processNetworkData(QString data){
+    QString ReplyText = data;
     qDebug() << data;
-    QString temperature = "";
-    QRegularExpressionMatch myRegExMatch = this->myRegEx->match(data);
-    temperature = myRegExMatch.captured(0);
-    this->myRegEx->setPattern("\\d\\d.\\d");
-    myRegExMatch = myRegEx->match(temperature);
-    temperature = myRegExMatch.captured(0);
-    qDebug() << temperature <<"Trying";
-    outDoorTempFar->blueTextData(temperature + " °F");
+    QJsonDocument json_doc = QJsonDocument::fromJson(ReplyText.toUtf8());
+    QJsonArray array = json_doc.array();
 
-    double farToCel = (5.0 / 9.0) * (temperature.toDouble() - 32.0);
-    QString temp = QString::number(farToCel, 'f', 2);
-    outDoorTempCel->blueTextData( temp + " °C");
+    QString humidity;
+    QString tempFahr;
+    QString tempCel;
+    QString weatherTextE;
+    double HumidDub;
+
+    foreach(const QJsonValue &v, array){
+        QJsonObject obj = v.toObject();
+
+        HumidDub = obj.value("RelativeHumidity").toInt();
+        humidity = QString::number(HumidDub,'f',2);
+        externalHumidity->blueTextData(humidity + " %");
+
+        tempFahr= QString::number(obj.value("Temperature").toObject().value("Imperial").toObject().value("Value").toDouble(),'f', 2);
+        externalTempFahr->blueTextData(tempFahr + " °F");
+
+        tempCel= QString::number(obj.value("Temperature").toObject().value("Metric").toObject().value("Value").toDouble(),'f', 2);
+        externalTempCel->blueTextData(tempCel + " °C");
+
+        weatherIcon = obj.value("WeatherIcon").toInt();
+        setWeatherIcon(weatherIcon);
+
+        weatherTextE = obj.value("WeatherText").toString();
+        //weatherText->whiteTextDataMedium(weatherTextE);
+    }
+    if(weatherIcon == 18){
+        weatherText->setPos(390,340);
+    }
+    else {
+        weatherText->setPos(390,320);
+    }
+}
+
+//Send signal to arduino to start and send data
+void MainWindow::requestSensorData(){
+    QString letter = "a";
+    serialPort->write(letter.toStdString().c_str());
 }

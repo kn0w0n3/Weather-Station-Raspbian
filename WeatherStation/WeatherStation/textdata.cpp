@@ -10,6 +10,18 @@ void TextData::textData(QString text){
     setFont(QFont("times",20));
 }
 
+void TextData::whiteTextData(QString text){
+    setPlainText(QString(text));
+    setDefaultTextColor(Qt::white);
+    setFont(QFont("times",35));
+}
+
+void TextData::whiteTextDataMedium(QString text){
+    setPlainText(QString(text));
+    setDefaultTextColor(Qt::white);
+    setFont(QFont("times",28));
+}
+
 void TextData::greenTextData(QString text){
     setPlainText(QString(text));
     setDefaultTextColor(Qt::green);
