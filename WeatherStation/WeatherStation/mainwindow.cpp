@@ -48,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
       background->setPos(0,0);
       scene->addItem(background);
 
-      lux= new BackgroundItem(QPixmap(":images/lux100"));
+      lux = new BackgroundItem(QPixmap(":images/lux100"));
       lux->setPos(15,420);
       scene->addItem(lux);
 
@@ -83,7 +83,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
       scene->addItem(temperature); 
 
       //Temperature in celsius Display
-      tempCelsius =new TextData();
+      tempCelsius = new TextData();
       tempCelsius->setPos(690,190);
       scene->addItem(tempCelsius);
 
@@ -102,19 +102,22 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
       externalTempCel->setPos(50,190);
       scene->addItem(externalTempCel);
 
+      //Display external humidity data
       externalHumidity = new TextData();
       externalHumidity->setPos(50,260);
       scene->addItem(externalHumidity);
 
+      //Display light sensor data
       lightData = new TextData();
       lightData->setPos(130,430);
       scene->addItem(lightData);
 
+      //Display weather text from accuweather
       weatherText = new TextData();
       weatherText->setPos(390,320);
       scene->addItem(weatherText);
 
-      //requestSensorData();
+      //Get local weather data fron the accuweather API
       this->networkManager = new OutdoorWeather();
       connect(networkManager, SIGNAL(dataReadyRead(QString)), this, SLOT(processNetworkData(QString)));
       networkManager->makeRequest("http://dataservice.accuweather.com/currentconditions/v1/327147?apikey=d3PFMAGeiKnHepd7bVDZTGeqmWBaWfqt&details=true");
@@ -165,7 +168,6 @@ void MainWindow::resizeEvent(QResizeEvent *event){
 
 //Set weather icon
 void MainWindow::setWeatherIcon(int n){
-
     if(iconActive == true){
         delete icon;
         iconActive = false;
@@ -193,9 +195,6 @@ void MainWindow::receiveSerialData(){
         c++;
         if(c == 1){
             if(value.length() == 5){
-                qDebug() << "c = " << c;
-                qDebug() << value;
-                qDebug() << "ok 5";
                 n1 =true;
                 counter++;
                 displayTempData(value);
@@ -203,9 +202,6 @@ void MainWindow::receiveSerialData(){
         }
         if(c == 2){
             if(value.length() == 5){
-                qDebug() << "c = " << c;
-                qDebug() << value;
-                qDebug() << "ok 5";
                 n2 = true;
                 counter++;
                 displayHumidData(value);
@@ -213,10 +209,6 @@ void MainWindow::receiveSerialData(){
         }
         if(c == 3){
             if(value.length() == 1 || value.length() == 2 || value.length() == 3 || value.length() == 4){
-                qDebug() << "c = " << c;
-                qDebug() << value;
-
-                qDebug() << "ok 3";
                 n3 = true;
                 counter++;
                 displayLightData(value);
@@ -224,8 +216,6 @@ void MainWindow::receiveSerialData(){
         }
         if(c == 3){
             if( n1 == true && n2 == true && n3 == true){
-                qDebug() << "Data pass";
-
                 serialBuffer = "";
                 n1 = false;
                 n2 = false;
@@ -234,8 +224,6 @@ void MainWindow::receiveSerialData(){
                 counter = 0;
             }
             else if(!(n1 == true && n2 == true && n3 == true)){
-                qDebug() << "Data NOT Pass";
-
                 serialBuffer = "";
                 n1 = false;
                 n2 = false;
