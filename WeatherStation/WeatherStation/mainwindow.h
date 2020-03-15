@@ -11,8 +11,6 @@
 #include <QDate>
 #include <QTime>
 #include <QTimer>
-#include <QRegularExpression>
-#include <QRegularExpressionMatch>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>

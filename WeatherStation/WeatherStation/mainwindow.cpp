@@ -188,7 +188,6 @@ void MainWindow::receiveSerialData(){
     int c = 0;
     serialData = serialPort->readAll();
     serialBuffer += QString::fromStdString(serialData.toStdString());
-    qDebug() << serialBuffer;
     QStringList tempList = serialBuffer.split("\n");
 
     foreach(QString value, tempList){
@@ -250,9 +249,8 @@ void MainWindow::showDate(){
 
 //Get current weather conditions from accuweather
 void MainWindow::processNetworkData(QString data){
-    QString ReplyText = data;
-    qDebug() << data;
-    QJsonDocument json_doc = QJsonDocument::fromJson(ReplyText.toUtf8());
+    QString replyText = data;
+    QJsonDocument json_doc = QJsonDocument::fromJson(replyText.toUtf8());
     QJsonArray array = json_doc.array();
 
     QString humidity;
@@ -279,12 +277,6 @@ void MainWindow::processNetworkData(QString data){
 
         weatherTextE = obj.value("WeatherText").toString();
         //weatherText->whiteTextDataMedium(weatherTextE);
-    }
-    if(weatherIcon == 18){
-        weatherText->setPos(390,340);
-    }
-    else {
-        weatherText->setPos(390,320);
     }
 }
 
