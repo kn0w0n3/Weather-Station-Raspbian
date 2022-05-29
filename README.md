@@ -18,3 +18,5 @@ Weather Station Application was designed to run on Raspberry Pi. The model used 
 10. That's it, click Ok and create a new project or open a project  
 
 ![wsls](https://user-images.githubusercontent.com/22214754/76711293-ea172100-66cb-11ea-9369-ef36785cfc6e.png)  
+
+![DHT11_Diagram](https://user-images.githubusercontent.com/22214754/170851788-415b0d6e-bf3a-4849-b906-614d9988d657.png)  
