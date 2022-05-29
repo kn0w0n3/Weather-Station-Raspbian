@@ -20,3 +20,5 @@ Weather Station Application was designed to run on Raspberry Pi. The model used 
 ![wsls](https://user-images.githubusercontent.com/22214754/76711293-ea172100-66cb-11ea-9369-ef36785cfc6e.png)  
 
 ![DHT11_Diagram](https://user-images.githubusercontent.com/22214754/170851788-415b0d6e-bf3a-4849-b906-614d9988d657.png)  
+
+![DHT11-Pinout-for-three-pin-and-four-pin-types-2](https://user-images.githubusercontent.com/22214754/170851804-a801e6ca-2af0-4949-99d6-4de4a1fb2526.jpg)  
